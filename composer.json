@@ -1,0 +1,14 @@
+{
+    "name": "architecture-mvc/app",
+    "description": "Un projet PHP respectant PSR-4",
+    "type": "project",
+    "autoload": {
+      "psr-4": {
+        "App\\": "src/"
+      }
+    },
+    "require": {
+      "php": ">=7.4"
+    }
+  }
+  
