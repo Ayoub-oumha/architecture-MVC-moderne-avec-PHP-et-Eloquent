@@ -1,56 +1,45 @@
-
-
 <?php
 
-class Router
-{
-    private $routes = [
-        'GET' => [],
-        'POST' => [],
- 
-    ];
+namespace Core;
 
-    // Add a route
-    public function add($method, $route, $callback)
-    {
-        $method = strtoupper($method);
+class Router {
+    private array $routes = [];
 
-        // Convert the route to a regex for dynamic parameters
-        $route = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([a-zA-Z0-9_]+)', $route);
-
-        $this->routes[$method][$route] = $callback;
+    public function get(string $uri, callable|array $action): void {
+        $this->routes['GET'][$uri] = $action;
     }
 
-    // Dispatch the route
+    public function post(string $uri, callable|array $action): void {
+        $this->routes['POST'][$uri] = $action;
+    }
 
-    public function dispatch($uri, $method)
-    {
-        // Remove query strings
-        $uri = parse_url($uri, PHP_URL_PATH);
+    public function dispatch(string $uri, string $method): void {
         $method = strtoupper($method);
-
-        foreach ($this->routes[$method] as $route => $callback) {
-            // Check if the route matches
-            if (preg_match('#^' . $route . '$#', $uri, $matches)) {
-                array_shift($matches); // Remove the full match
-
-                // Check if the callback is an array (controller and method)
-                if (is_array($callback)) {
-                    // Make sure the controller is an instance
-                    $controller = new $callback[0]();
-                    $method = $callback[1];
-
-                    // Call the controller method
-                    return call_user_func_array([$controller, $method], $matches);
-                }
-
-                // Otherwise, call the callback directly
-                return call_user_func_array($callback, $matches);
+        
+        // Get current URL path
+        $uri = parse_url($uri, PHP_URL_PATH);
+        $uri = trim($uri, '/');
+        // Remove 'public' from URL if present
+        $uri = str_replace('public/', '', $uri);
+        
+        if (isset($this->routes[$method][$uri])) {
+            $action = $this->routes[$method][$uri];
+            
+            if (is_callable($action)) {
+                call_user_func($action);
+            } elseif (is_array($action)) {
+                [$controller, $method] = $action;
+                $controllerInstance = new $controller();
+                call_user_func([$controllerInstance, $method]);
             }
+        } else {
+            http_response_code(404);
+            echo "404 Not Found";
         }
+    }
 
-        // Handle 404
-        http_response_code(404);
-     	  echo "404 - Not Found";
+    // Helper method to get current route
+    public function getCurrentRoute(): string {
+        return parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     }
 }
