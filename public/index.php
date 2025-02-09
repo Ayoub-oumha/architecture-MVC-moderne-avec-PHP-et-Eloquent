@@ -8,7 +8,7 @@ use App\Controllers\HomeController;
 $router = new Router();
 
 // Routes simples
-$router->get('', [HomeController::class, 'index']);
+$router->get('', [HomeController::class, 'welcom']);
 $router->get('about', [HomeController::class, 'about']);
 
 // Route l home page
