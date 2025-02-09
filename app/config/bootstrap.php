@@ -2,6 +2,7 @@
 namespace App\config;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../core/helpers.php';
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Dotenv\Dotenv;
